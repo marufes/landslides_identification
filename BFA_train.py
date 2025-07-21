@@ -8,7 +8,7 @@ import datetime
 
 import torch
 import numpy as np
-from src import BFA_resunet
+from . import BFA_resunet
 from train_and_eval import train_one_epoch, evaluate, create_lr_scheduler
 from my_dataset import VOCSegmentation
 from callbacks import LossHistory
