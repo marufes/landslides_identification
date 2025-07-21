@@ -8,7 +8,7 @@ from typing import Dict
 import torch
 import torch.nn as nn
 from torch import Tensor
-from .backbone_resnet import resnet50
+from backbone_resnet import resnet50
 from .Unet_decode import Up, OutConv
 from torch.nn import functional as F
 
