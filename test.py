@@ -110,7 +110,7 @@ def main(args):
                                              collate_fn=val_dataset.collate_fn,
                                              drop_last = True)
 
-    model = create_model(num_classes=num_classes, pretrain=False)                                                       # 导入模型
+    model = create_model(num_classes=num_classes, pretrain=True)                                                       # 导入模型
     model.to(device)
     val_mean_loss, confmat = evaluate(model, val_loader, device=device, num_classes=num_classes)
 
