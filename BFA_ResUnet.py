@@ -162,7 +162,11 @@ class BFA(nn.Module):
         gray_image = self.to_grayscale(x)
 
         # 使用Canny算子进行边缘检测
-        tenInput = torch.FloatTensor(numpy.ascontiguousarray(x[:, :, ::-1].transpose(2, 0, 1).astype(numpy.float32) * (1.0 / 255.0)))
+        # Flip channel order safely
+        x_ = x[:, [2, 1, 0], :, :]  # BGR <-> RGB
+        
+        # Normalize if needed
+        tenInput = x_.float() * (1.0 / 255.0)
         edge_image = estimate(tenInput)
         # 将边缘图像与原图像进行通道级联
         concatenated_image = torch.cat([x, edge_image], dim=1)
