@@ -25,16 +25,6 @@ args_strModel = 'bsds500' # only 'bsds500' for now
 args_strIn = './images/sample.png'
 args_strOut = './out.png'
 
-for strOption, strArg in getopt.getopt(sys.argv[1:], '', [
-    'model=',
-    'in=',
-    'out=',
-])[0]:
-    if strOption == '--model' and strArg != '': args_strModel = strArg # which model to use
-    if strOption == '--in' and strArg != '': args_strIn = strArg # path to the input image
-    if strOption == '--out' and strArg != '': args_strOut = strArg # path to where the output should be stored
-# end
-
 ##########################################################
 
 class Network(torch.nn.Module):
