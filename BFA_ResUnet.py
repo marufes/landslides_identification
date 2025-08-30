@@ -160,6 +160,7 @@ class BFA(nn.Module):
     def forward(self, x):
         # 将输入图像转换为灰度图像
         gray_image = self.to_grayscale(x)
+        print("Shape of x:", x.shape)
 
         # 使用Canny算子进行边缘检测
         # Flip channel order safely
