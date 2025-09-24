@@ -30,7 +30,6 @@ plt.title("Gradient Magnitude (Sobel)")
 plt.imshow(eges, cmap='gray')
 plt.axis('off')
 
-   
         for name, x in inputs.items():
         if focal_loss:
             loss = Focal_Loss(x, target, ignore_index=255)
