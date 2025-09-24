@@ -41,9 +41,7 @@ for name, x in inputs.items():
             loss = loss + dice_loss
 
         losses[name] = loss
-
-    return losses['out']
-
+return losses['out']
 def evaluate(model, data_loader, device, num_classes):
     model.eval()
     confmat = utils.ConfusionMatrix(num_classes)
