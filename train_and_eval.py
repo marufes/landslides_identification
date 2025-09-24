@@ -11,9 +11,22 @@ from loss_function import build_target, Focal_Loss, CE_Loss, Dice_loss
 def criterion(inputs, target, num_classes: int = 2, focal_loss: bool = True, dice_loss: bool = True):
     losses = {}
     
-import cv2
-import numpy as np
-import matplotlib.pyplot as plt
+
+    for name, x in inputs.items():
+        if focal_loss:
+            loss = Focal_Loss(x, target, ignore_index=255)
+        else:
+            loss = CE_Loss(x, target, ignore_index=255)
+
+        if dice_loss:
+            dice_target = build_target(target, num_classes, ignore_index=255)
+            dice_loss_val = Dice_loss(x, dice_target)
+            loss = loss + dice_loss_val
+
+        losses[name] = loss
+
+    return losses['out']
+
 
 def visualize_edges(mask):
     """
@@ -41,6 +54,9 @@ def visualize_edges(mask):
     plt.imshow(edges, cmap='gray')
     plt.axis('off')
     plt.show()
+
+
+
 
         for name, x in inputs.items():
         if focal_loss:
