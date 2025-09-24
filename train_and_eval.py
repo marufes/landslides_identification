@@ -10,24 +10,38 @@ from loss_function import build_target, Focal_Loss, CE_Loss, Dice_loss
 
 def criterion(inputs, target, num_classes: int = 2, focal_loss: bool = True, dice_loss: bool = True):
     losses = {}
-    import cv2
+    
+import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 
-# --- Sobel gradients ---
-img=target
-sobelx = cv2.Sobel(img, cv2.CV_64F, 1, 0, ksize=3)
-sobely = cv2.Sobel(img, cv2.CV_64F, 0, 1, ksize=3)
+def visualize_edges(mask):
+    """
+    Visualize Sobel gradient edges of a target or predicted mask.
+    """
+    if isinstance(mask, torch.Tensor):
+        mask = mask.detach().cpu().numpy().astype(np.uint8)
 
-grad_mag = np.sqrt(sobelx**2 + sobely**2)
-grad_mag = cv2.normalize(grad_mag, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
+    sobelx = cv2.Sobel(mask, cv2.CV_64F, 1, 0, ksize=3)
+    sobely = cv2.Sobel(mask, cv2.CV_64F, 0, 1, ksize=3)
 
-# --- Threshold to keep strong edges only ---
-_, edges = cv2.threshold(grad_mag, 50, 255, cv2.THRESH_BINARY)
+    grad_mag = np.sqrt(sobelx**2 + sobely**2)
+    grad_mag = cv2.normalize(grad_mag, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
 
-plt.title("Gradient Magnitude (Sobel)")
-plt.imshow(eges, cmap='gray')
-plt.axis('off')
+    _, edges = cv2.threshold(grad_mag, 50, 255, cv2.THRESH_BINARY)
+
+    plt.figure(figsize=(10, 4))
+    plt.subplot(1, 2, 1)
+    plt.title("Gradient Magnitude (Sobel)")
+    plt.imshow(grad_mag, cmap='gray')
+    plt.axis('off')
+
+    plt.subplot(1, 2, 2)
+    plt.title("Thresholded Edges")
+    plt.imshow(edges, cmap='gray')
+    plt.axis('off')
+    plt.show()
+
         for name, x in inputs.items():
         if focal_loss:
             loss = Focal_Loss(x, target, ignore_index=255)
