@@ -10,6 +10,40 @@ from loss_function import build_target, Focal_Loss, CE_Loss, Dice_loss
 
 def criterion(inputs, target, num_classes: int = 2, focal_loss: bool = True, dice_loss: bool = True):
     losses = {}
+    import cv2
+import numpy as np
+import matplotlib.pyplot as plt
+
+# --- Load image ---
+# replace 'your_image.jpg' with your actual image path
+img = cv2.imread('your_image.jpg', cv2.IMREAD_GRAYSCALE)
+
+# --- Sobel gradients ---
+sobelx = cv2.Sobel(img, cv2.CV_64F, 1, 0, ksize=3)
+sobely = cv2.Sobel(img, cv2.CV_64F, 0, 1, ksize=3)
+
+# Gradient magnitude
+grad_mag = np.sqrt(sobelx**2 + sobely**2)
+grad_mag = cv2.normalize(grad_mag, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
+
+# --- Threshold to keep strong edges only ---
+_, edges = cv2.threshold(grad_mag, 50, 255, cv2.THRESH_BINARY)
+
+# --- Display ---
+plt.figure(figsize=(10,4))
+
+plt.subplot(1,2,1)
+plt.title("Gradient Magnitude (Sobel)")
+plt.imshow(grad_mag, cmap='gray')
+plt.axis('off')
+
+plt.subplot(1,2,2)
+plt.title("Thresholded Edges")
+plt.imshow(edges, cmap='gray')
+plt.axis('off')
+
+plt.show()
+
     for name, x in inputs.items():
 
         if focal_loss:
