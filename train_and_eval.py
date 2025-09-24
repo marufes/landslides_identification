@@ -27,7 +27,7 @@ grad_mag = cv2.normalize(grad_mag, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint
 _, edges = cv2.threshold(grad_mag, 50, 255, cv2.THRESH_BINARY)
 
 plt.title("Gradient Magnitude (Sobel)")
-plt.imshow(eges, cmap='gray')
+plt.imshow(edges, cmap='gray')
 plt.axis('off')
 for name, x in inputs.items():
         if focal_loss:
@@ -41,7 +41,7 @@ for name, x in inputs.items():
             loss = loss + dice_loss
 
         losses[name] = loss
-    return losses['out']
+        return losses['out']
 def evaluate(model, data_loader, device, num_classes):
     model.eval()
     confmat = utils.ConfusionMatrix(num_classes)
