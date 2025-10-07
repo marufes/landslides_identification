@@ -118,8 +118,8 @@ def criterion(inputs, target, num_classes: int = 2, focal_loss: bool = True, dic
     print("Finding boundary pixels for ground truth")
     boundary_ref = find_boundary(target)
     
-    print("Finding boundary pixels for predictions")
-    boundary_pred = find_boundary(inputs)
+    # print("Finding boundary pixels for predictions")
+    # boundary_pred = find_boundary(inputs)
 
     for name, x in inputs.items():
             if focal_loss:
