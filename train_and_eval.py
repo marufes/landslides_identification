@@ -33,6 +33,7 @@ def criterion(inputs, target, num_classes: int = 2, focal_loss: bool = True, dic
     # plt.axis('off')
     img = target[0].detach().cpu().numpy()
     plt.figure(figsize=(4, 4))
+    print(img)
     plt.title("Ground Truth Mask")
     plt.imshow(img, cmap='gray')
     plt.axis('off')
