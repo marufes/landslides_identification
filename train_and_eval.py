@@ -14,45 +14,95 @@ import matplotlib.pyplot as plt
 import torch
 import torch.nn.functional as F
 
+# def find_boundary(target: torch.Tensor):
+#     """
+#     Finds boundary pixels (1s with at least one 0 neighbor) in a binary mask.
+#     Also prints total number of 1s and boundary pixels.
+
+#     Args:
+#         target (torch.Tensor): Tensor of shape (H, W) or (B, H, W) with values {0,1}.
+#     Returns:
+#         torch.Tensor: Boundary map (same shape as target) with 1 at boundary pixels, else 0.
+#     """
+
+#     # Ensure float tensor and 4D shape (B, 1, H, W)
+#     if target.dim() == 2:
+#         target = target.unsqueeze(0).unsqueeze(0)
+#     elif target.dim() == 3:
+#         target = target.unsqueeze(1)
+#     target = target.float()
+
+#     # Define 3×3 kernel to check all 8 neighbors
+#     kernel = torch.ones((1, 1, 3, 3), device=target.device)
+#     kernel[:, :, 1, 1] = 0  # exclude center pixel
+
+#     # Count number of 1 neighbors per pixel
+#     neighbor_count = F.conv2d(target, kernel, padding=1)
+
+#     # Boundary condition: pixel=1 and not all neighbors are 1
+#     boundary = (target == 1) & (neighbor_count < 8)
+
+#     # Flatten to original shape
+#     boundary = boundary.squeeze(1).long()
+
+#     # Compute and print stats
+#     total_ones = int(target.sum().item())
+#     boundary_count = int(boundary.sum().item())
+
+#     print(f"Total 1s in target: {total_ones}")
+#     print(f"Boundary pixels: {boundary_count}")
+
+#     return boundary
+
+
+import torch
+import torch.nn.functional as F
+
 def find_boundary(target: torch.Tensor):
     """
-    Finds boundary pixels (1s with at least one 0 neighbor) in a binary mask.
-    Also prints total number of 1s and boundary pixels.
+    Finds bidirectional boundary pixels between 0 and 1 regions.
+    A pixel is boundary if:
+      - It is 1 and has at least one 0 neighbor, OR
+      - It is 0 and has at least one 1 neighbor.
 
     Args:
-        target (torch.Tensor): Tensor of shape (H, W) or (B, H, W) with values {0,1}.
+        target (torch.Tensor): Binary mask of shape (H, W) or (B, H, W).
     Returns:
-        torch.Tensor: Boundary map (same shape as target) with 1 at boundary pixels, else 0.
+        torch.Tensor: Boundary map (same shape as target) with 1 for boundary pixels, else 0.
     """
 
-    # Ensure float tensor and 4D shape (B, 1, H, W)
+    # Ensure tensor is float and has shape (B,1,H,W)
     if target.dim() == 2:
         target = target.unsqueeze(0).unsqueeze(0)
     elif target.dim() == 3:
         target = target.unsqueeze(1)
     target = target.float()
 
-    # Define 3×3 kernel to check all 8 neighbors
+    # 3x3 kernel for 8-connected neighborhood
     kernel = torch.ones((1, 1, 3, 3), device=target.device)
-    kernel[:, :, 1, 1] = 0  # exclude center pixel
+    kernel[:, :, 1, 1] = 0  # exclude center
 
-    # Count number of 1 neighbors per pixel
+    # Count neighboring 1s for each pixel
     neighbor_count = F.conv2d(target, kernel, padding=1)
 
-    # Boundary condition: pixel=1 and not all neighbors are 1
-    boundary = (target == 1) & (neighbor_count < 8)
+    # --- Boundary condition ---
+    # Case 1: pixel = 1 and has at least one 0 neighbor
+    boundary_1 = (target == 1) & (neighbor_count < 8)
+    # Case 2: pixel = 0 and has at least one 1 neighbor
+    boundary_0 = (target == 0) & (neighbor_count > 0)
 
-    # Flatten to original shape
-    boundary = boundary.squeeze(1).long()
+    # Combine both boundaries
+    boundary = (boundary_1 | boundary_0).squeeze(1).long()
 
-    # Compute and print stats
+    # --- Statistics ---
     total_ones = int(target.sum().item())
     boundary_count = int(boundary.sum().item())
 
     print(f"Total 1s in target: {total_ones}")
-    print(f"Boundary pixels: {boundary_count}")
+    print(f"Boundary pixels (both 0↔1 sides): {boundary_count}")
 
     return boundary
+
 
 def criterion(inputs, target, num_classes: int = 2, focal_loss: bool = True, dice_loss: bool = True):
     losses = {}
