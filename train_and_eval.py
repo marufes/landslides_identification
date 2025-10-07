@@ -17,6 +17,7 @@ def criterion(inputs, target, num_classes: int = 2, focal_loss: bool = True, dic
     
     # --- Sobel gradients ---
     img=target
+    print(img.shape)
     sobelx = cv2.Sobel(img, cv2.CV_64F, 1, 0, ksize=3)
     sobely = cv2.Sobel(img, cv2.CV_64F, 0, 1, ksize=3)
     
