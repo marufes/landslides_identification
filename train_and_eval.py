@@ -10,34 +10,66 @@ from loss_function import build_target, Focal_Loss, CE_Loss, Dice_loss
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
+
+import torch
+import torch.nn.functional as F
+
+def find_boundary(target: torch.Tensor):
+    """
+    Finds boundary pixels (1s with at least one 0 neighbor) in a binary mask.
+    Also prints total number of 1s and boundary pixels.
+
+    Args:
+        target (torch.Tensor): Tensor of shape (H, W) or (B, H, W) with values {0,1}.
+    Returns:
+        torch.Tensor: Boundary map (same shape as target) with 1 at boundary pixels, else 0.
+    """
+
+    # Ensure float tensor and 4D shape (B, 1, H, W)
+    if target.dim() == 2:
+        target = target.unsqueeze(0).unsqueeze(0)
+    elif target.dim() == 3:
+        target = target.unsqueeze(1)
+    target = target.float()
+
+    # Define 3×3 kernel to check all 8 neighbors
+    kernel = torch.ones((1, 1, 3, 3), device=target.device)
+    kernel[:, :, 1, 1] = 0  # exclude center pixel
+
+    # Count number of 1 neighbors per pixel
+    neighbor_count = F.conv2d(target, kernel, padding=1)
+
+    # Boundary condition: pixel=1 and not all neighbors are 1
+    boundary = (target == 1) & (neighbor_count < 8)
+
+    # Flatten to original shape
+    boundary = boundary.squeeze(1).long()
+
+    # Compute and print stats
+    total_ones = int(target.sum().item())
+    boundary_count = int(boundary.sum().item())
+
+    print(f"Total 1s in target: {total_ones}")
+    print(f"Boundary pixels: {boundary_count}")
+
+    return boundary
+
 def criterion(inputs, target, num_classes: int = 2, focal_loss: bool = True, dice_loss: bool = True):
     losses = {}
     
-
-    
-    # # --- Sobel gradients ---
-    # img=target
-    # img=img[0]
-    # img=img.detach().cpu().numpy()
-    # sobelx = cv2.Sobel(img, cv2.CV_64F, 1, 0, ksize=3)
-    # sobely = cv2.Sobel(img, cv2.CV_64F, 0, 1, ksize=3)
-    
-    # grad_mag = np.sqrt(sobelx**2 + sobely**2)
-    # grad_mag = cv2.normalize(grad_mag, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
-    
-    # # --- Threshold to keep strong edges only ---
-    # _, edges = cv2.threshold(grad_mag, 50, 255, cv2.THRESH_BINARY)
-    
-    # plt.title("Gradient Magnitude (Sobel)")
-    # plt.imshow(edges, cmap='gray')
+    # img = target[0].detach().cpu().numpy()
+    # plt.figure(figsize=(4, 4))
+    # print(img)
+    # plt.title("Ground Truth Mask")
+    # plt.imshow(img, cmap='gray')
     # plt.axis('off')
-    img = target[0].detach().cpu().numpy()
-    plt.figure(figsize=(4, 4))
-    print(img)
-    plt.title("Ground Truth Mask")
-    plt.imshow(img, cmap='gray')
-    plt.axis('off')
-    plt.show()
+    # plt.show()
+
+    print("Finding boundary pixels for ground truth")
+    boundary_ref = find_boundary(target)
+    
+    print("Finding boundary pixels for predictions")
+    boundary_pred = find_boundary(inputs)
 
     for name, x in inputs.items():
             if focal_loss:
@@ -52,6 +84,8 @@ def criterion(inputs, target, num_classes: int = 2, focal_loss: bool = True, dic
     
             losses[name] = loss
     return losses['out']
+
+
 def evaluate(model, data_loader, device, num_classes):
     model.eval()
     confmat = utils.ConfusionMatrix(num_classes)
