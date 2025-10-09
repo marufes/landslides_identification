@@ -6,7 +6,9 @@ import torch
 from torch import nn
 import torch.nn.functional
 import distributed_utils as utils
-from loss_function import build_target, Focal_Loss, CE_Loss, Dice_loss, Weighted_CE_Loss
+# With this line:
+from loss_function import build_target, Focal_Loss, Dice_loss, Weighted_CE_Loss
+import torch.nn as nn
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
