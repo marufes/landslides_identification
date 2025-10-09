@@ -131,7 +131,7 @@ def criterion(inputs, target, num_classes: int = 2, focal_loss: bool = False, di
                 # loss = Focal_Loss(x, target, ignore_index=255)
                 loss = Focal_Loss(x, target, weight_map=weight_map, ignore_index=255)
             else:
-                loss = CE_Loss(x, target, ignore_index=255)
+                loss = F.cross_entropy(x, target, ignore_index=255)
                 # loss = Weighted_CE_Loss(x, target, weight_map=weight_map, ignore_index=255)
     
             if dice_loss:
