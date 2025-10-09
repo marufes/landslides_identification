@@ -51,21 +51,63 @@ def Weighted_CE_Loss(inputs, target, weight_map=None, ignore_index: int = -100):
     return ce.mean()
 
 
-def Focal_Loss(inputs, target, ignore_index: int = -100, alpha=0.5, gamma=2):
+# def Focal_Loss(inputs, target, ignore_index: int = -100, alpha=0.5, gamma=2):
+#     n, c, h, w = inputs.size()
+#     nt, ht, wt = target.size()
+
+#     temp_inputs = inputs.transpose(1, 2).transpose(2, 3).contiguous().view(-1, c)
+#     temp_target = target.view(-1)
+
+#     logpt = -nn.CrossEntropyLoss(ignore_index=ignore_index)(temp_inputs, temp_target)
+
+#     pt = torch.exp(logpt)
+#     if alpha is not None:
+#         logpt *= alpha
+#     loss = -((1 - pt) ** gamma) * logpt
+#     focal_loss = loss.mean()
+#     return focal_loss
+
+def Focal_Loss(inputs, target, weight_map=None, ignore_index: int = -100, alpha=0.5, gamma=2.0):
+    """
+    Boundary-aware focal loss for segmentation.
+    
+    Args:
+        inputs (torch.Tensor): [N, C, H, W] logits (unnormalized).
+        target (torch.Tensor): [N, H, W] ground truth labels.
+        weight_map (torch.Tensor, optional): [N, H, W], pixel-wise weights (e.g., boundary emphasis).
+        ignore_index (int): label to ignore in loss computation.
+        alpha (float): class balancing factor.
+        gamma (float): focusing parameter.
+    """
     n, c, h, w = inputs.size()
-    nt, ht, wt = target.size()
 
-    temp_inputs = inputs.transpose(1, 2).transpose(2, 3).contiguous().view(-1, c)
-    temp_target = target.view(-1)
+    # Flatten inputs and targets
+    inputs_flat = inputs.permute(0, 2, 3, 1).contiguous().view(-1, c)  # (N*H*W, C)
+    targets_flat = target.view(-1)                                    # (N*H*W)
 
-    logpt = -nn.CrossEntropyLoss(ignore_index=ignore_index)(temp_inputs, temp_target)
+    # Compute per-pixel CE loss (no reduction!)
+    ce_loss = F.cross_entropy(inputs_flat, targets_flat, ignore_index=ignore_index, reduction='none')
 
-    pt = torch.exp(logpt)
+    # Get probabilities for the true class
+    pt = torch.exp(-ce_loss)
+
+    # Apply alpha if specified
     if alpha is not None:
-        logpt *= alpha
-    loss = -((1 - pt) ** gamma) * logpt
-    focal_loss = loss.mean()
-    return focal_loss
+        ce_loss = alpha * ce_loss
+
+    # Focal loss term
+    focal_loss = ((1 - pt) ** gamma) * ce_loss
+
+    # If boundary weights are provided, apply them
+    if weight_map is not None:
+        weight_map_flat = weight_map.view(-1)
+        focal_loss = focal_loss * weight_map_flat
+
+    # Mask out ignored pixels explicitly
+    valid_mask = (targets_flat != ignore_index)
+    focal_loss = focal_loss[valid_mask]
+
+    return focal_loss.mean()
 
 def Dice_loss(inputs, dice_target, beta=1, smooth=1e-5):
     n, c, h, w = inputs.size()
