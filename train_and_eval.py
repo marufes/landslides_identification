@@ -106,7 +106,7 @@ def find_boundary(target: torch.Tensor):
     return boundary
 
 
-def criterion(inputs, target, num_classes: int = 2, focal_loss: bool = True, dice_loss: bool = True):
+def criterion(inputs, target, num_classes: int = 2, focal_loss: bool = False, dice_loss: bool = False):
     losses = {}
     
     # img = target[0].detach().cpu().numpy()
@@ -153,7 +153,7 @@ def evaluate(model, data_loader, device, num_classes):
         for image, target in metric_logger.log_every(data_loader, 100, header):
             image, target = image.to(device), target.to(device)
             output = model(image)
-            loss = criterion(output, target, num_classes=2, focal_loss=True, dice_loss=True)
+            loss = criterion(output, target, num_classes=2, focal_loss=False, dice_loss=False)
 
             output1 = output['out']
 
@@ -173,7 +173,7 @@ def train_one_epoch(model, optimizer, data_loader, device, epoch, lr_scheduler, 
         image, target = image.to(device), target.to(device)
         with torch.cuda.amp.autocast(enabled=scaler is not None):
             output = model(image)
-            loss = criterion(output, target, num_classes=2, focal_loss=True, dice_loss=True)
+            loss = criterion(output, target, num_classes=2, focal_loss=False, dice_loss=False)
 
         optimizer.zero_grad()
         if scaler is not None:
