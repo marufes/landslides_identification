@@ -7,7 +7,7 @@ from torch import nn
 import torch.nn.functional
 import distributed_utils as utils
 # With this line:
-from loss_function import build_target, Focal_Loss, Dice_loss, Weighted_CE_Loss
+from loss_function import build_target, Focal_Loss, Dice_loss, Weighted_CE_Loss, CE_Loss
 import torch.nn as nn
 import cv2
 import numpy as np
@@ -131,7 +131,7 @@ def criterion(inputs, target, num_classes: int = 2, focal_loss: bool = False, di
                 # loss = Focal_Loss(x, target, ignore_index=255)
                 loss = Focal_Loss(x, target, weight_map=weight_map, ignore_index=255)
             else:
-                loss = F.cross_entropy(x, target, ignore_index=255)
+                loss = CE_Loss(x, target, ignore_index=255)
                 # loss = Weighted_CE_Loss(x, target, weight_map=weight_map, ignore_index=255)
     
             if dice_loss:
