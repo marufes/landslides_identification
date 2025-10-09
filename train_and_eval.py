@@ -119,14 +119,15 @@ def criterion(inputs, target, num_classes: int = 2, focal_loss: bool = True, dic
     boundary_ref = find_boundary(target)
     weight_map = torch.ones_like(target).float()
     weight_map[boundary_ref == 1] = 2.0  # Example: double weight on boundary pixels
-
+    weight_map = weight_map / weight_map.mean()
     
     # print("Finding boundary pixels for predictions")
     # boundary_pred = find_boundary(inputs)
 
     for name, x in inputs.items():
             if focal_loss:
-                loss = Focal_Loss(x, target, ignore_index=255)
+                # loss = Focal_Loss(x, target, ignore_index=255)
+                loss = Focal_Loss(x, target, weight_map=weight_map, ignore_index=255)
             else:
                 # loss = CE_Loss(x, target, ignore_index=255)
                 loss = Weighted_CE_Loss(x, target, weight_map=weight_map, ignore_index=255)
