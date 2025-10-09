@@ -20,15 +20,15 @@ def build_target(target: torch.Tensor, num_classes: int = 2, ignore_index: int =
 
     return dice_target
 
-# def CE_Loss(inputs, target, ignore_index: int = -100):
-#     n, c, h, w = inputs.size()
-#     nt, ht, wt = target.size()
+def CE_Loss(inputs, target, ignore_index: int = -100):
+    n, c, h, w = inputs.size()
+    nt, ht, wt = target.size()
 
-#     temp_inputs = inputs.transpose(1, 2).transpose(2, 3).contiguous().view(-1, c)
-#     temp_target = target.view(-1)
+    temp_inputs = inputs.transpose(1, 2).transpose(2, 3).contiguous().view(-1, c)
+    temp_target = target.view(-1)
 
-#     CE_loss = nn.CrossEntropyLoss(ignore_index=ignore_index)(temp_inputs, temp_target)
-#     return CE_loss
+    CE_loss = nn.CrossEntropyLoss(ignore_index=ignore_index)(temp_inputs, temp_target)
+    return CE_loss
 
 def Weighted_CE_Loss(inputs, target, weight_map=None, ignore_index: int = -100):
     n, c, h, w = inputs.size()
