@@ -6,7 +6,7 @@ import torch
 from torch import nn
 import torch.nn.functional
 import distributed_utils as utils
-from loss_function import build_target, Focal_Loss, CE_Loss, Dice_loss
+from loss_function import build_target, Focal_Loss, CE_Loss, Dice_loss, Weighted_CE_Loss
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
@@ -117,6 +117,9 @@ def criterion(inputs, target, num_classes: int = 2, focal_loss: bool = True, dic
 
     print("Finding boundary pixels for ground truth")
     boundary_ref = find_boundary(target)
+    weight_map = torch.ones_like(target).float()
+    weight_map[boundary_ref == 1] = 2.0  # Example: double weight on boundary pixels
+
     
     # print("Finding boundary pixels for predictions")
     # boundary_pred = find_boundary(inputs)
@@ -125,7 +128,8 @@ def criterion(inputs, target, num_classes: int = 2, focal_loss: bool = True, dic
             if focal_loss:
                 loss = Focal_Loss(x, target, ignore_index=255)
             else:
-                loss = CE_Loss(x, target, ignore_index=255)
+                # loss = CE_Loss(x, target, ignore_index=255)
+                loss = Weighted_CE_Loss(x, target, weight_map=weight_map, ignore_index=255)
     
             if dice_loss:
                 dice_target = build_target(target, num_classes, ignore_index=255)
