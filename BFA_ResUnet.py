@@ -160,7 +160,7 @@ class BFA_resunet(nn.Module):
         backbone = resnet50()
 
         if pretrain_backbone:
-            backbone.load_state_dict(torch.load("resnet50.pth", map_location='cpu'), strict=False)
+            backbone.load_state_dict(torch.load("resnet50.pth", map_location='cpu', weights_only=False), strict=False)
 
         self.stage_out_channels = [64, 256, 512, 1024, 2048]
         return_layers = {
