@@ -131,8 +131,8 @@ def criterion(inputs, target, num_classes: int = 2, focal_loss: bool = False, di
                 # loss = Focal_Loss(x, target, ignore_index=255)
                 loss = Focal_Loss(x, target, weight_map=weight_map, ignore_index=255)
             else:
-                loss = CE_Loss(x, target, ignore_index=255)
-                # loss = Weighted_CE_Loss(x, target, weight_map=weight_map, ignore_index=255)
+                #loss = CE_Loss(x, target, ignore_index=255)
+                loss = Weighted_CE_Loss(x, target, weight_map=weight_map, ignore_index=255)
     
             if dice_loss:
                 dice_target = build_target(target, num_classes, ignore_index=255)
@@ -173,7 +173,7 @@ def train_one_epoch(model, optimizer, data_loader, device, epoch, lr_scheduler, 
         image, target = image.to(device), target.to(device)
         with torch.cuda.amp.autocast(enabled=scaler is not None):
             output = model(image)
-            loss = criterion(output, target, num_classes=2, focal_loss=False, dice_loss=False)
+            loss = criterion(output, target, num_classes=2, focal_loss=True, dice_loss=False)
 
         optimizer.zero_grad()
         if scaler is not None:
