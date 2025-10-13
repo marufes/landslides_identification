@@ -120,7 +120,7 @@ def criterion(inputs, target, num_classes: int = 2, focal_loss: bool = False, di
     print("Finding boundary pixels for ground truth")
     boundary_ref = find_boundary(target)
     weight_map = torch.ones_like(target).float()
-    weight_map[boundary_ref == 1] = 1.4  # Example: double weight on boundary pixels
+    weight_map[boundary_ref == 1] = 1.5  # Example: double weight on boundary pixels
     weight_map = weight_map / weight_map.mean()
     
     # print("Finding boundary pixels for predictions")
