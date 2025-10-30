@@ -120,7 +120,7 @@ def criterion(inputs, target, num_classes: int = 2, focal_loss: bool = False, di
     print("Finding boundary pixels for ground truth")
     boundary_ref = find_boundary(target)
     weight_map = torch.ones_like(target).float()
-    weight_map[boundary_ref == 1] = 1.5 # Example: double weight on boundary pixels
+    weight_map[boundary_ref == 1] = 1.4 # Example: double weight on boundary pixels
     weight_map = weight_map / weight_map.mean()
     
     # print("Finding boundary pixels for predictions")
@@ -173,7 +173,7 @@ def train_one_epoch(model, optimizer, data_loader, device, epoch, lr_scheduler, 
         image, target = image.to(device), target.to(device)
         with torch.cuda.amp.autocast(enabled=scaler is not None):
             output = model(image)
-            loss = criterion(output, target, num_classes=2, focal_loss=True, dice_loss=True)
+            loss = criterion(output, target, num_classes=2, focal_loss=False, dice_loss=True)
 
         optimizer.zero_grad()
         if scaler is not None:
