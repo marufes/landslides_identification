@@ -67,7 +67,7 @@ def get_transform():
 def create_model(num_classes, pretrain=True):
     model =BFA_resunet(num_classes=num_classes, pretrain_backbone=True)
     if pretrain:
-        model_path = '/content/drive/MyDrive/Project/save_weights_14/ep002-loss0.209-val_loss0.120.pth'                                                                # 预训练权重
+        model_path = '/content/drive/MyDrive/Project/save_weights_15/ep001-loss0.254-val_loss0.124.pth'                                                                # 预训练权重
         print('Load weights {}.'.format(model_path))
         device          = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         model_dict      = model.state_dict()
