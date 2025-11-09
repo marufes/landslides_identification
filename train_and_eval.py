@@ -109,13 +109,13 @@ def find_boundary(target: torch.Tensor):
 def criterion(inputs, target, num_classes: int = 2, focal_loss: bool = False, dice_loss: bool = False):
     losses = {}
     
-    # img = target[0].detach().cpu().numpy()
-    # plt.figure(figsize=(4, 4))
-    # print(img)
-    # plt.title("Ground Truth Mask")
-    # plt.imshow(img, cmap='gray')
-    # plt.axis('off')
-    # plt.show()
+    img = target[0].detach().cpu().numpy()
+    plt.figure(figsize=(4, 4))
+    print(img)
+    plt.title("Ground Truth Mask")
+    plt.imshow(img, cmap='gray')
+    plt.axis('off')
+    plt.show()
 
     print("Finding boundary pixels for ground truth")
     boundary_ref = find_boundary(target)
