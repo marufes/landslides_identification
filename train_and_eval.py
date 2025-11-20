@@ -156,7 +156,13 @@ def evaluate(model, data_loader, device, num_classes):
             loss = criterion(output, target, num_classes=2, focal_loss=False, dice_loss=False)
 
             output1 = output['out']
-
+     img = target[0].detach().cpu().numpy()
+    plt.figure(figsize=(4, 4))
+    print(img)
+    plt.title("Ground Truth Mask")
+    plt.imshow(img, cmap='gray')
+    plt.axis('off')
+    plt.show()
             confmat.update(target.flatten(), output1.argmax(1).flatten())
 
             metric_logger.update(loss=loss.item())
