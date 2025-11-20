@@ -162,7 +162,8 @@ def evaluate(model, data_loader, device, num_classes):
             plt.title("Ground Truth Mask")
             plt.imshow(img, cmap='gray')
             plt.axis('off')
-            plt.show()
+            plt.savefig("/content/output_pred.png")
+            plt.close()
 
             confmat.update(target.flatten(), output1.argmax(1).flatten())
 
